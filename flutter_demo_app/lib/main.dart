@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+
   final String title;
 
   @override
@@ -32,34 +33,30 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController();
   String _username = '';
-  int _passwordLength = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _usernameController.addListener(onTextChanged);
-    _passwordController.addListener(passwordChanged);
-  }
-
-  void onTextChanged() {
-    setState(() {
-      _username = _usernameController.text;
-    });
-  }
-
-  void passwordChanged() {
-    setState(() {
-      _passwordLength = _passwordController.text.length;
-    });
-  }
+  String _email = '';
 
   @override
   void dispose() {
     _usernameController.dispose();
-    _passwordController.dispose();
+    _emailController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.addListener(() {
+      setState(() {
+        _username = _usernameController.text;
+      });
+    });
+    _emailController.addListener(() {
+      setState(() {
+        _email = _emailController.text;
+      });
+    });
   }
 
   @override
@@ -71,65 +68,59 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Form(
         key: _formKey,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Username entered: $_username"),
-                SizedBox(height: 8),
-                Text("Password length: $_passwordLength"),
+                Text(
+                  "Current username: $_username",
+                ),
+                Text("Current email: $_email"),
                 SizedBox(height: 16),
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
-                    labelText: 'Enter Username',
+                    labelText: 'Username',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter some text';
+                      return 'Please enter a username';
                     }
                     return null;
                   },
                 ),
+                SizedBox(height: 16),
                 TextFormField(
-                  controller: _passwordController,
+                  controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Enter Password',
+                    labelText: 'Email',
                   ),
-                  obscureText: true,
                   validator: (value) {
-                    if (value == null || value.length < 6) {
-                      return 'Please enter at least 6 characters';
+                    if (value == null ||
+                        value.isEmpty ||
+                        !value.contains('@')) {
+                      return 'Please enter a valid email';
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text("$_username logged in successfully")),
-                          );
-                        }
-                      },
-                      child: const Text('Submit'),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        _usernameController.text = 'Tom';
-                        _passwordController.text = '123456';
-                      },
-                      child: const Text('Fill Form'),
-                    ),
-                  ],
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Column(
+                          children: [
+                            Text("Username: $_username"),
+                            Text("Email: $_email"),
+                          ],
+                        )),
+                      );
+                    }
+                  },
+                  child: const Text('Submit'),
                 ),
               ],
             ),
